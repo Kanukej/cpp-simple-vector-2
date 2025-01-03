@@ -154,6 +154,19 @@ public:
         ++size_;
     }
     
+    template <typename... Args>
+    T& EmplaceBack(Args&&... args) {
+        if (size_ == Capacity()) {
+            RawMemory<T> new_data(size_ == 0 ? 1 : size_ * 2);
+            new (new_data + size_) T(std::forward<Args>(args)...);
+            SwapCopy(new_data);
+        } else {
+            new (data_ + size_) T(std::forward<Args>(args)...);
+        }
+        ++size_;
+        return data_[size_ - 1];
+    }
+    
     void PushBack(T&& value) {
         if (size_ == Capacity()) {
             RawMemory<T> new_data(size_ == 0 ? 1 : size_ * 2);
